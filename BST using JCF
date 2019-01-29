@@ -1,0 +1,155 @@
+
+package bst;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.*;
+import javax.swing.*;
+
+
+public class BST extends JFrame implements ActionListener{
+    JPanel panel=new JPanel();
+      private JButton nodes= new JButton("Insert node");
+      private JButton inorder= new JButton("Inorder Traversal");
+      private JButton postorder= new JButton("Postorder Traversal");
+      private JButton preorder= new JButton("Preorder Traversal");
+      private JButton remove= new JButton("Remove node");
+     
+    private static TreeSet<Integer> ts1 = new TreeSet<>();
+    private static ArrayList<Integer> post=new ArrayList<>();
+     Stack<Integer> stack2 = new Stack<>();
+     Stack<Integer> stack = new Stack<>();
+     Stack<Integer> stack3 = new Stack<>();
+   // int[] arr= post.stream().mapToInt( );
+    int[] flag;
+    int z;
+   
+      BST()
+      {
+          panel.setLayout(new FlowLayout());
+          panel.add(nodes);
+          panel.add(inorder);
+          panel.add(preorder);
+          panel.add(postorder);
+          panel.add(remove);
+          add(panel);
+          nodes.addActionListener(new ActionListener()
+          {
+          
+              @Override
+              public void actionPerformed(ActionEvent e) {
+                
+            String nodes=JOptionPane.showInputDialog("Enter node value");
+            int node= Integer.parseInt(nodes);
+            post.add(node);
+      
+            ts1.add(node);
+      
+              }
+          });
+          
+           remove.addActionListener(new ActionListener()
+           {
+                @Override
+              public void actionPerformed(ActionEvent e) {
+               String nodes=JOptionPane.showInputDialog("Enter value to be removed");
+            int rem= Integer.parseInt(nodes);
+            ts1.remove(rem);
+            System.out.println(ts1);
+              }  
+           });
+           
+            postorder.addActionListener(new ActionListener()
+            {
+                 @Override
+              public void actionPerformed(ActionEvent e) {
+                      stack.push(post.get(0));
+int c=post.size();
+		while(post.isEmpty()==false && c!=0) {
+			int x=stack.pop();
+			c--;
+			stack2.push(x);
+			for(int i=post.indexOf(x);i<post.size();i++) {
+				if (post.get(i)<x && stack.indexOf(post.get(i))==-1) {
+					stack.push(post.get(i));
+					break;
+				}
+			}
+			for(int i=post.indexOf(x);i<post.size();i++) {
+				if (post.get(i)>x && stack.indexOf(post.get(i))==-1) {
+					stack.push(post.get(i));
+					break;
+				}
+			}
+			
+		}
+                while(stack2.isEmpty()==false)
+                {
+                    z=stack2.pop();
+                    stack3.push(z);
+                }
+		System.out.println(stack3.toString());
+                // String s=stack2.toString();
+                 
+		
+	}
+      });
+             preorder.addActionListener(new ActionListener()
+             {
+                  @Override
+              public void actionPerformed(ActionEvent e) {
+                  int root=post.get(0);
+            stack.push(root);
+                  while(stack.isEmpty()==false&& post.isEmpty()==false)
+                  { 
+                      int x=stack.pop();
+                  
+                      System.out.println(x);
+                      post.remove(new Integer(x));
+                      for(int i: post)
+                      {
+                          if(i>x){
+                             
+                              stack.push(i); 
+                          break;
+                          
+                      }
+                            
+                      }
+                      for( int i: post)
+                      {
+                          if(i<x){
+                            
+                              stack.push(i);
+                          break;
+                      }
+                      }
+               
+                  }
+              }
+             });
+              inorder.addActionListener(this);
+      }
+    
+    public static void main(String[] args) {
+        // TODO code application logic here
+       // BST tree= new BST();
+        JFrame f=new BST();
+         f.setSize(800,100);
+         
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        f.setLocationRelativeTo(null);
+        f.setVisible(true);
+               
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+       if(e.getActionCommand()=="Inorder Traversal")
+       {
+           System.out.println(ts1);
+           
+       }
+      
+    }
+}
