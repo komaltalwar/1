@@ -1,0 +1,231 @@
+
+package ganttchart;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.border.Border;
+
+public class GanttChart extends JFrame {
+    Canvas canvas = new Canvas();
+
+    private JTextField text = new JTextField(30);
+    private JCheckBox b1= new JCheckBox("FCFS");
+    private JCheckBox b2 = new JCheckBox("SJF");
+    private JButton button = new JButton("COMPUTE");
+    private JLabel label = new JLabel("GANTT CHART");
+    private JPanel p1 = new JPanel();
+    private JPanel p2 = new JPanel();
+
+    private static boolean sjf = false;
+    private static boolean fcfs = false;
+//array lists required
+    private static ArrayList<String> pFCFS = new ArrayList<>();
+    private static ArrayList<String> pSJF = new ArrayList<>();
+    private static ArrayList<Integer> timeFCFS = new ArrayList<>();
+    private static ArrayList<Integer> timeSJF = new ArrayList<>();
+    private static ArrayList<Integer> times_percSJF = new ArrayList<>();
+    private static ArrayList<Integer> times_percFCFS = new ArrayList<>();
+
+    private GanttChart() {
+        //Setting layouts of panels
+        p1.setLayout(new BoxLayout(p1, BoxLayout.PAGE_AXIS));
+        p2.setLayout(new BoxLayout(p2, BoxLayout.PAGE_AXIS));
+
+        //Setting alignments
+        text.setMaximumSize(new Dimension(400, 25));
+        text.setAlignmentX(Component.CENTER_ALIGNMENT);
+        b1.setAlignmentX(Component.CENTER_ALIGNMENT);
+        b2.setAlignmentX(Component.CENTER_ALIGNMENT);
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // panel1
+        p1.add(Box.createRigidArea(new Dimension(1000, 30)));
+        p1.add(text);
+        p1.add(Box.createRigidArea(new Dimension(1000, 50)));
+        p1.add(b1);
+        p1.add(b2);
+        p1.add(Box.createRigidArea(new Dimension(1000, 30)));
+        p1.add(button);
+
+        // panel2
+        Border border = BorderFactory.createLineBorder(Color.BLUE, 2);
+        p2.setBorder(border);
+        p2.setPreferredSize(new Dimension(400,400));
+
+        p2.add(canvas);
+
+
+        //Adding panels to main frame
+        this.setLayout(new BorderLayout());
+        this.add(p1, BorderLayout.CENTER);
+        this.add(p2, BorderLayout.SOUTH);
+
+        b2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (b2.isSelected() == true)
+                    sjf = true;
+                else
+                    sjf = false;
+            }
+        });
+
+        b1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (b1.isSelected() == true)
+                    fcfs = true;
+                else
+                    fcfs = false;
+            }
+        });
+
+        //Adding action listeners
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                timeFCFS.removeAll(timeFCFS);
+                pFCFS.removeAll(pFCFS);
+                timeSJF.removeAll(timeSJF);
+                pSJF.removeAll(pSJF);
+                times_percSJF.removeAll(times_percSJF);
+                times_percFCFS.removeAll(times_percFCFS);
+                String data = text.getText();
+                String s = "";
+//segregation of input data into different array lists
+                for (int i = 0; i < data.length(); ++i) {
+                    if (data.charAt(i) == ',') {
+                        pFCFS.add(s);
+                        pSJF.add(s);
+                        s = "";
+                    } else if (data.charAt(i) == ';') {
+                        int x = Integer.parseInt(s);
+                        timeFCFS.add(x);
+                        timeSJF.add(x);
+                        s = "";
+                    } else if (data.charAt(i) == '.') {
+                        int x = Integer.parseInt(s);
+                        timeFCFS.add(x);
+                        timeSJF.add(x);
+                        break;
+                    } else {
+                        s += data.charAt(i);
+                    }
+                }
+                //sorting
+                for (int i = 0; i < timeSJF.size() - 1; ++i)
+                    for (int j = 0; j < timeSJF.size() - i - 1; ++j)
+                        if (timeSJF.get(j) > timeSJF.get(j + 1)) {
+                            int temp = timeSJF.get(j);
+                            timeSJF.set(j, timeSJF.get(j + 1));
+                            timeSJF.set(j + 1, temp);
+                            String temp_s = pSJF.get(j);
+                            pSJF.set(j, pSJF.get(j + 1));
+                            pSJF.set(j + 1, temp_s);
+                        }
+                int sum =0;
+                for(int i=0;i<timeSJF.size();++i)
+                {
+                    sum+=timeSJF.get(i);
+                }
+
+                for(int i=0;i<timeFCFS.size();++i)
+                {
+                    times_percFCFS.add((int)((timeFCFS.get(i)*500.0)/sum));
+                }
+
+                for(int i=0;i<timeSJF.size();++i)
+                {
+                    times_percSJF.add((int)((timeSJF.get(i)*500.0)/sum));
+                }
+//                System.out.println(times_percFCFS);
+//                System.out.println(times_percSJF);
+                repaint();
+            }
+        });
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new GanttChart();
+        frame.setSize(800,800);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    public static class Canvas extends JPanel {
+        public void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            if(sjf)
+            {
+                g.setFont(new Font("Arial",Font.PLAIN,16));
+                g.drawString("Shortest job First",190,190);
+                int cnt=0;
+                int sum=0;
+                for (int i=0;i<times_percSJF.size();++i)
+                {
+                    g.setFont(new Font("Arial",Font.PLAIN,14));
+                    int red = (int)(Math.random()*256.0);
+                    int green = (int)(Math.random()*256.0);
+                    int blue = (int)(Math.random()*256.0);
+                    Color color = new Color(red, green, blue);
+                    g.setColor(color);
+                    g.fillRect(cnt,100,times_percSJF.get(i),75);
+                    g.setColor(Color.BLACK);
+                    g.drawString(Integer.toString(sum+timeSJF.get(i)),cnt+times_percSJF.get(i)-25,170);
+                    g.setFont(new Font("Arial",Font.BOLD,16));
+                    g.drawString(pSJF.get(i),cnt+(times_percSJF.get(i))/2-5,140);
+                    cnt+=times_percSJF.get(i);
+                    sum+=timeSJF.get(i);
+                }
+            }
+            if(fcfs)
+            {
+                g.setFont(new Font("Arial",Font.PLAIN,16));
+                g.drawString("First Come First Serve",180,90);
+                int cnt=0;
+                int sum=0;
+                for (int i=0;i<times_percFCFS.size();++i)
+                {
+                    g.setFont(new Font("Arial",Font.PLAIN,14));
+                    int red = (int)(Math.random()*256.0);
+                    int green = (int)(Math.random()*256.0);
+                    int blue = (int)(Math.random()*256.0);
+                    Color color = new Color(red, green, blue);
+                    g.setColor(color);
+                    
+                    g.fillRect(cnt,0,times_percFCFS.get(i),75);
+                    g.setColor(Color.BLACK);
+                    g.drawString(Integer.toString(sum+timeFCFS.get(i)),cnt+times_percFCFS.get(i)-25,70);
+                    g.setFont(new Font("Arial",Font.BOLD,16));
+                    g.drawString(pFCFS.get(i),cnt+(times_percFCFS.get(i))/2-5,40);
+                    cnt+=times_percFCFS.get(i);
+                    sum+=timeFCFS.get(i);
+                }
+            }
+            if(!fcfs&&!sjf)
+            {
+                g.setFont(new Font("Cambria Math",Font.BOLD,30));
+                g.drawString("GANTT CHART",300,100);
+            }
+        }
+    }
+}
+
